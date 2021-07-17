@@ -1,0 +1,5 @@
+# This is where falcon will add any info about any certificates that it creates for you.
+# Alternatively, you can put any info about your own certificates here.
+# See https://doc.traefik.io/traefik/https/tls/#user-defined for more info.
+tls:
+  certificates: {}
