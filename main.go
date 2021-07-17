@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"sync"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/events"
@@ -15,71 +14,81 @@ import (
 // TODO (if possible): I cannot find a way to determine the unique ID of the proxy container.
 // For now though, just using the default name that falcon creates the container under should be
 // alright
+
 const DefaultContainerName = "falcon-proxy"
+
+func main() {
+	syncer, err := NewProxySyncer()
+
+	if err != nil {
+		log.Fatalln("Unable to create a Docker client. This is likely due to a bug. ERROR:", err)
+	}
+
+	syncer.Start()
+}
+
 
 type ProxySyncer struct {
 	Client *client.Client
 	Context context.Context
-	WaitGroup *sync.WaitGroup
 	ContainerID string
+	EventChannel <-chan events.Message
+}
+
+type Event struct {
+	Message events.Message
+	Finished bool
 }
 
 // Creates a new Syncer struct for syncing a container with all Docker networks on a machine.
 // Returns an empty struct and an error if it was unable to construct the Docker client.
 func NewProxySyncer() (ProxySyncer, error) {
 	// The most up-to-date client version as of writing this code. Ensures object shapes and other
-	// such stuff doesn't change on us depending on
+	// such stuff doesn't change on us depending on the user's version of Docker
 	client, err := client.NewClientWithOpts(client.WithVersion("20.10.7"), client.FromEnv)
 	if err != nil {
 		return ProxySyncer{}, nil
 	}
+	context := context.Background()
+	eventChannel, _ := client.Events(context, types.EventsOptions{Filters: createFilters()})
+
 
 	return ProxySyncer{
 		Client: client,
-		Context: context.Background(),
-		WaitGroup: &sync.WaitGroup{},
+		Context: context,
 		ContainerID: DefaultContainerName,
+		EventChannel: eventChannel,
 	}, nil
 }
 
 // StartSyncing listens to the Docker API for any network changes and either adds or removes the
 // falcon-proxy as necessary, whenever any changes come in.
-func (syncer ProxySyncer) StartSyncing() {
-	syncer.WaitGroup.Add(1)
-	go syncer.listenForNetworkEvents(syncer.getEventChannel())
-
-	syncer.WaitGroup.Wait()
-}
-
-// getEventChannel returns the event channel for the syncer's Docker client.
-func (syncer ProxySyncer) getEventChannel() <-chan events.Message {
-	eventChannel, _ := syncer.Client.Events(syncer.Context, types.EventsOptions{Filters: createFilters()})
-	return eventChannel
+func (syncer ProxySyncer) Start() {
+	syncer.listenForNetworkEvents()
 }
 
 // listenForNetworkEvents reads in Docker events from the passed in channel and either adds the proxy
 // to the network, removes the proxy from the network, or does nothing, depending on what's necessary.
 // Note that this method is blocking and will never return, as it is designed to run for perpetuity.
-func (syncer ProxySyncer) listenForNetworkEvents(eventChannel <-chan events.Message) {
+func (syncer ProxySyncer) listenForNetworkEvents() {
 	for {
-		message := <- eventChannel
-
+		event := <- syncer.EventChannel
 		connectedNetworks, err := syncer.connectedNetworks()
 
 		if err != nil {
-			log.Println("ERROR: Unable to read what networks the proxy is connected to. This is likely due to a bug.")
+			log.Println("Unable to read what networks the proxy is connected to. ERROR:", err)
 			continue
-		} else if connectedNetworks[message.Actor.ID] == nil {
+		} else if connectedNetworks[event.Actor.ID] == nil {
 			continue
 		}
 
-		switch message.Action {
+		switch event.Action {
 			case "destroy": {
-				syncer.leaveNetwork(message.Actor.ID)
+				syncer.leaveNetwork(event.Actor.ID)
 				break
 			}
 			case "create": {
-				syncer.joinNetwork(message.Actor.ID)
+				syncer.joinNetwork(event.Actor.ID)
 				break
 			}
 		}
