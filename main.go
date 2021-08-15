@@ -11,10 +11,6 @@ import (
 	"github.com/docker/docker/client"
 )
 
-// TODO (if possible): I cannot find a way to determine the unique ID of the proxy container.
-// For now though, just using the default name that falcon creates the container under should be
-// alright
-
 const DefaultContainerName = "falcon-proxy"
 
 func main() {
