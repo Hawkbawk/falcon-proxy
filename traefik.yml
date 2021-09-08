@@ -1,0 +1,18 @@
+log:
+  level: INFO
+
+api:
+  insecure: false
+  dashboard: true
+
+entryPoints:
+  http:
+    address: ":80"
+
+providers:
+  docker:
+    exposedByDefault: false
+    defaultRule: 'Host(`{{ .Name }}.{{ index .Labels "com.docker.compose.project" }}.docker`)'
+  file:
+    filename: /usr/src/app/dynamic.yml
+    watch: true
