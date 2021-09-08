@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN GOOS=linux GOARCH=amd64 go build -v -o auto-join-networks
+RUN go build -v -o auto-join-networks
 
 FROM traefik:2.4
 
