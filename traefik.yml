@@ -2,7 +2,7 @@ log:
   level: INFO
 
 api:
-  insecure: false
+  insecure: true
   dashboard: true
 
 entryPoints:
@@ -12,7 +12,7 @@ entryPoints:
 providers:
   docker:
     exposedByDefault: false
-    defaultRule: 'Host(`{{ .Name }}.{{ index .Labels "com.docker.compose.project" }}.docker`)'
+    defaultRule: 'Host(`{{ trimPrefix `/` .Name }}.{{ index .Labels "com.docker.compose.project" }}.docker`)'
   file:
     filename: /usr/src/app/dynamic.yml
     watch: true
