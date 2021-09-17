@@ -17,7 +17,6 @@ WORKDIR ${WORKDIR}
 
 LABEL AUTHOR="Ryan Hawkins (ryanlarryhawkins@gmail.com)"
 
-# We avoid changing our directory so that we know which directory traefik
 COPY --from=builder /go/src/github.com/Hawkbawk/falcon-proxy/auto-join-networks /usr/local/bin/auto-join-networks
 COPY traefik.yml dynamic.yml entrypoint.sh ./
 
