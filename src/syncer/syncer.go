@@ -102,7 +102,7 @@ func (syncer Syncer) Sync() error {
 // The code there, at the time of writing, was licensed under the MIT License. The license can be
 // found at https://github.com/codekitchen/dinghy-http-proxy/blob/master/LICENSE
 func (syncer Syncer) validNetworks() (map[string]bool, error) {
-	allNetworks, err := syncer.Client.NetworkList(syncer.Context, types.NetworkListOptions{Filters: filters.NewArgs(filters.KeyValuePair{Key: "dangling", Value: "false"})})
+	allNetworks, err := syncer.Client.NetworkList(syncer.Context, types.NetworkListOptions{})
 
 	if err != nil {
 		return nil, nil
@@ -119,6 +119,7 @@ func (syncer Syncer) validNetworks() (map[string]bool, error) {
 			return nil, err
 		}
 
+		validNetworks[network.ID] = syncer.isValidNetwork(network)
 		if syncer.isValidNetwork(network) {
 			validNetworks[network.ID] = true
 		}
