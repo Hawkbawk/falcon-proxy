@@ -119,7 +119,6 @@ func (syncer Syncer) validNetworks() (map[string]bool, error) {
 			return nil, err
 		}
 
-		validNetworks[network.ID] = syncer.isValidNetwork(network)
 		if syncer.isValidNetwork(network) {
 			validNetworks[network.ID] = true
 		}
