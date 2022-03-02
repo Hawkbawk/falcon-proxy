@@ -23,4 +23,4 @@ COPY config/dynamic.yml ./config/dynamic.yml
 
 EXPOSE 80 443 8080
 
-CMD ["${WORKDIR}/entrypoint.sh"]
+CMD "${WORKDIR}/entrypoint.sh"
