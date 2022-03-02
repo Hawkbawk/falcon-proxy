@@ -17,5 +17,5 @@ providers:
     exposedByDefault: false
     defaultRule: 'Host(`{{ trimPrefix `/` .Name }}.{{ index .Labels "com.docker.compose.project" }}.docker`)'
   file:
-    filename: /usr/src/app/dynamic.yml
+    filename: /usr/src/app/config/dynamic.yml
     watch: true

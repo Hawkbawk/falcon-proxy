@@ -14,16 +14,16 @@ import (
 
 const ProxyContainerName = "falcon-proxy"
 
-// Syncer is the class responsible for ensuring that the syncer Traefik container stays in sync with
+// Syncer is the class responsible for ensuring that the Traefik container stays in sync with
 // all Docker networks on the machine, joining them when they're created and leaving them when
-// they're destroyed. Note that an empty Syncer will NOT work. You must call the `NewProxySyncer`
+// they're destroyed. Note that an empty Syncer will NOT work. You must call the `NewSyncer`
 // function instead.
 type Syncer struct {
 	Client       *client.Client
 	Context      context.Context
 	CancelFunc   context.CancelFunc
 	EventChannel <-chan events.Message
-	ContainerId string
+	ContainerId  string
 }
 
 // Creates a new ProxySyncer struct for syncing a container with all Docker networks on a machine.
@@ -47,15 +47,15 @@ func NewSyncer() (Syncer, error) {
 	}
 
 	return Syncer{
-	Client:       client,
-	Context:      context,
-	CancelFunc:   cancelFunc,
-	EventChannel: eventChannel,
-	ContainerId: containers[0].ID,
+		Client:       client,
+		Context:      context,
+		CancelFunc:   cancelFunc,
+		EventChannel: eventChannel,
+		ContainerId:  containers[0].ID,
 	}, nil
 }
 
-// sync determines what networks the proxy container needs to join and which networks it needs to
+// Sync determines what networks the proxy container needs to join and which networks it needs to
 // leave and joins and leaves those networks as appropriate. It does this by determining which
 // networks the syncer container is already a part of and which networks are considered valid. If
 // the syncer hasn't joined a valid network, it joins it. If the syncer is still part of an invalid

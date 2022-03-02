@@ -18,8 +18,9 @@ WORKDIR ${WORKDIR}
 LABEL AUTHOR="Ryan Hawkins (ryanlarryhawkins@gmail.com)"
 
 COPY --from=builder /go/src/github.com/Hawkbawk/falcon-proxy/auto-join-networks /usr/local/bin/auto-join-networks
-COPY traefik.yml dynamic.yml entrypoint.sh ./
+COPY traefik.yml entrypoint.sh ./
+COPY config/dynamic.yml ./config/dynamic.yml
 
-EXPOSE 80 8080
+EXPOSE 80 443 8080
 
-CMD "${WORKDIR}/entrypoint.sh"
+CMD ["${WORKDIR}/entrypoint.sh"]

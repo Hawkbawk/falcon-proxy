@@ -6,9 +6,9 @@ import (
 	"github.com/Hawkbawk/falcon-proxy/src/syncer"
 )
 
-// If we encounter more than maxRepeatedErrorCount errors repeatedly,
+// If we encounter more than MaxRepeatedErrorCount errors repeatedly,
 // we should stop syncing, cause we probably are just going to keep having an error.
-const maxRepeatedErrorCount = 10
+const MaxRepeatedErrorCount = 10
 
 func main() {
 	s, err := syncer.NewSyncer()
@@ -26,8 +26,8 @@ func main() {
 		if err := s.Sync(); err != nil {
 			log.Printf("Unable to perform a sync. ERROR: %v", err)
 			repeatedErrorCount += 1
-			if repeatedErrorCount > maxRepeatedErrorCount {
-				log.Fatalf("Stopping syncing as %v or more errors were encountered in a row.", maxRepeatedErrorCount)
+			if repeatedErrorCount > MaxRepeatedErrorCount {
+				log.Fatalf("Stopping syncing as %v or more errors were encountered in a row.", MaxRepeatedErrorCount)
 			}
 		}
 		repeatedErrorCount = 0
