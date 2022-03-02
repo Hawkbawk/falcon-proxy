@@ -8,6 +8,9 @@ api:
 entryPoints:
   http:
     address: ":80"
+  https:
+    address: ":443"
+    tls:
 
 providers:
   docker:
